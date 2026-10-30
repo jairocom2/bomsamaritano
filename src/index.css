@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-plum-50: #fbf7fa;
+  --color-plum-100: #f5edf3;
+  --color-plum-200: #ecdae6;
+  --color-plum-300: #debdd4;
+  --color-plum-400: #c996bc;
+  --color-plum-500: #af6fa0;
+  --color-plum-600: #8c4b7b;
+  --color-plum-700: #653052;
+  --color-plum-800: #522742;
+  --color-plum-900: #452339;
+  --color-plum-950: #291120;
+
+  --color-solar-50: #fff8f2;
+  --color-solar-100: #ffeedf;
+  --color-solar-200: #fedbbd;
+  --color-solar-300: #fcbe8c;
+  --color-solar-400: #f99852;
+  --color-solar-500: #f58a34;
+  --color-solar-600: #e36a20;
+  --color-solar-700: #bb4e1a;
+  --color-solar-800: #953f1d;
+  --color-solar-900: #79361b;
+}
+
+:root {
+  --brand-plum: #653052;
+  --brand-plum-hover: #522742;
+  --brand-orange: #f58a34;
+  --brand-orange-hover: #e36a20;
+}
+
+@layer base {
+  body {
+    background-color: #faf9fb;
+    color: #1e1b1e;
+    -webkit-tap-highlight-color: transparent;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+}
