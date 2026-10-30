@@ -119,12 +119,13 @@ export function generateReportPDF({
   doc.text(`R$ ${totalPendente.toFixed(2)}`, 112, currentY + 13);
 
   // Col 4
+  const isVolReport = reportType === 'voluntarios';
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text('EMPRESAS / MÍDIA', 158, currentY + 6);
+  doc.text(isVolReport ? 'TOTAL PARCEIROS' : 'EMPRESAS / MÍDIA', 158, currentY + 6);
   doc.setFontSize(11);
   doc.setTextColor(30, 41, 59);
-  doc.text(`${sponsorsToUse.length} emp. (${videosGravados} vids)`, 158, currentY + 13);
+  doc.text(isVolReport ? `${sponsorsToUse.length} parceiros` : `${sponsorsToUse.length} emp. (${videosGravados} vids)`, 158, currentY + 13);
 
   currentY += 24;
 
@@ -133,23 +134,60 @@ export function generateReportPDF({
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(30, 41, 59);
-    doc.text('Patrocinadores & Voluntários Responsáveis', 14, currentY);
+    doc.text(isVolReport ? 'Patrocinadores Conquistados' : 'Patrocinadores & Voluntários Responsáveis', 14, currentY);
     currentY += 3;
 
-    const tableBody = sponsorsToUse.map((s, idx) => [
-      (idx + 1).toString(),
-      s.nome,
-      s.voluntario || 'Não atribuído',
-      `R$ ${s.valor_cota.toFixed(2)}`,
-      s.forma_pagamento,
-      s.status,
-      s.video_gravado ? 'Sim' : 'Pendente',
-      s.logo_enviada ? 'Sim' : 'Pendente'
-    ]);
+    const tableBody = sponsorsToUse.map((s, idx) => {
+      const statusTxt = s.status === 'Recebido' ? 'Pago' : 'Não pago';
+      if (isVolReport) {
+        return [
+          (idx + 1).toString(),
+          s.nome,
+          s.voluntario || 'Não atribuído',
+          `R$ ${s.valor_cota.toFixed(2)}`,
+          s.forma_pagamento,
+          statusTxt
+        ];
+      }
+      return [
+        (idx + 1).toString(),
+        s.nome,
+        s.voluntario || 'Não atribuído',
+        `R$ ${s.valor_cota.toFixed(2)}`,
+        s.forma_pagamento,
+        s.status,
+        s.video_gravado ? 'Sim' : 'Pendente',
+        s.logo_enviada ? 'Sim' : 'Pendente'
+      ];
+    });
+
+    const headRow = isVolReport
+      ? [['#', 'Empresa', 'Voluntário', 'Cota', 'Forma Pgto', 'Status']]
+      : [['#', 'Empresa', 'Voluntário', 'Cota', 'Forma Pgto', 'Status', 'Vídeo', 'Logo']];
+
+    const colStyles = isVolReport
+      ? {
+          0: { cellWidth: 8, halign: 'center' as const },
+          1: { cellWidth: 54, fontStyle: 'bold' as const },
+          2: { cellWidth: 40 },
+          3: { cellWidth: 28, halign: 'right' as const, fontStyle: 'bold' as const },
+          4: { cellWidth: 30 },
+          5: { cellWidth: 24, halign: 'center' as const },
+        }
+      : {
+          0: { cellWidth: 8, halign: 'center' as const },
+          1: { cellWidth: 42, fontStyle: 'bold' as const },
+          2: { cellWidth: 32 },
+          3: { cellWidth: 22, halign: 'right' as const, fontStyle: 'bold' as const },
+          4: { cellWidth: 26 },
+          5: { cellWidth: 20, halign: 'center' as const },
+          6: { cellWidth: 16, halign: 'center' as const },
+          7: { cellWidth: 16, halign: 'center' as const },
+        };
 
     autoTable(doc, {
       startY: currentY,
-      head: [['#', 'Empresa', 'Voluntário', 'Cota', 'Forma Pgto', 'Status', 'Vídeo', 'Logo']],
+      head: headRow,
       body: tableBody,
       theme: 'grid',
       headStyles: {
@@ -166,16 +204,7 @@ export function generateReportPDF({
       alternateRowStyles: {
         fillColor: [248, 250, 252],
       },
-      columnStyles: {
-        0: { cellWidth: 8, halign: 'center' },
-        1: { cellWidth: 42, fontStyle: 'bold' },
-        2: { cellWidth: 32 },
-        3: { cellWidth: 22, halign: 'right', fontStyle: 'bold' },
-        4: { cellWidth: 26 },
-        5: { cellWidth: 20, halign: 'center' },
-        6: { cellWidth: 16, halign: 'center' },
-        7: { cellWidth: 16, halign: 'center' },
-      },
+      columnStyles: colStyles as any,
     });
 
     // @ts-ignore

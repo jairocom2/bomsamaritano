@@ -108,7 +108,10 @@ export const VolunteersView: React.FC<VolunteersViewProps> = ({
       text += `• Já Recebido: R$ ${vol.valorRecebido.toFixed(2)}${vol.valorPendente > 0 ? ` (A receber: R$ ${vol.valorPendente.toFixed(2)})` : ''}\n`;
       text += `• Empresas:\n`;
       vol.patrocinadores.forEach(sp => {
-        text += `   - ${sp.nome}: R$ ${sp.valor_cota.toFixed(2)} (${sp.status})\n`;
+        const isPago = sp.status === 'Recebido';
+        const emoji = isPago ? '✅' : '❌';
+        const statusTexto = isPago ? 'Pago' : 'Não pago';
+        text += `   ${emoji} ${sp.nome}: R$ ${sp.valor_cota.toFixed(2)} (${statusTexto})\n`;
       });
       text += `\n`;
     });
@@ -137,10 +140,10 @@ export const VolunteersView: React.FC<VolunteersViewProps> = ({
     }
     text += `\n🏢 *Seus Patrocinadores:*\n`;
     vol.patrocinadores.forEach(sp => {
-      text += `• *${sp.nome}* - R$ ${sp.valor_cota.toFixed(2)} (${sp.forma_pagamento})\n`;
-      text += `   - Status Pgto: ${sp.status}\n`;
-      text += `   - Logo: ${sp.logo_enviada ? 'Enviada ✓' : 'Pendente ✗'}\n`;
-      text += `   - Vídeo: ${sp.video_gravado ? 'Gravado ✓' : 'Pendente ⏳'}\n`;
+      const isPago = sp.status === 'Recebido';
+      const statusEmoji = isPago ? '✅' : '❌';
+      const statusTexto = isPago ? 'Pago' : 'Não pago';
+      text += `${statusEmoji} *${sp.nome}* - R$ ${sp.valor_cota.toFixed(2)} (${statusTexto} • ${sp.forma_pagamento})\n`;
     });
     text += `\n_Muito obrigado pela sua dedicação ao Projeto Bom Samaritano!_`;
 
@@ -355,30 +358,26 @@ export const VolunteersView: React.FC<VolunteersViewProps> = ({
             </div>
           </div>
 
-          {/* Cards de Métricas do Voluntário Selecionado */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+          {/* Cards de Métricas do Voluntário Selecionado (3 métricas financeiras essenciais) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <span className="text-[10px] font-bold text-slate-500 uppercase block">Total Conquistado</span>
               <span className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5 block">
                 R$ {currentVolunteerStats.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
             </div>
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-500 uppercase block">Já Recebido</span>
-              <span className="text-base sm:text-lg font-extrabold text-emerald-700 mt-0.5 block">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <span className="text-[10px] font-bold text-slate-500 uppercase block">Já Recebido (Pago)</span>
+              <span className="text-base sm:text-lg font-extrabold text-emerald-700 mt-0.5 block flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 R$ {currentVolunteerStats.valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
             </div>
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-500 uppercase block">A Receber</span>
-              <span className="text-base sm:text-lg font-extrabold text-amber-700 mt-0.5 block">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <span className="text-[10px] font-bold text-slate-500 uppercase block">A Receber (Pendente)</span>
+              <span className="text-base sm:text-lg font-extrabold text-amber-700 mt-0.5 block flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-amber-600" />
                 R$ {currentVolunteerStats.valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-500 uppercase block">Mídia (Vídeos/Logos)</span>
-              <span className="text-base sm:text-lg font-extrabold text-teal-700 mt-0.5 block">
-                {currentVolunteerStats.videosGravados} vídeos / {currentVolunteerStats.logosRecebidas} logos
               </span>
             </div>
           </div>
@@ -386,48 +385,46 @@ export const VolunteersView: React.FC<VolunteersViewProps> = ({
           {/* Lista das Empresas Captadas por Este Voluntário */}
           <div className="space-y-2 pt-2">
             <h3 className="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
-              <Building2 className="w-4 h-4 text-emerald-600" />
-              Patrocinadores Conquistados por {currentVolunteerStats.nome}:
+              <span>🏢</span>
+              <span>Seus Patrocinadores:</span>
             </h3>
 
             <div className="space-y-2">
-              {currentVolunteerStats.patrocinadores.map((sp) => (
-                <div key={sp.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <div>
-                    <span className="font-bold text-slate-900 text-sm block">{sp.nome}</span>
-                    <span className="text-xs text-slate-500 flex items-center gap-2">
-                      <Phone className="w-3 h-3 text-slate-400" />
-                      {sp.contato} • {sp.forma_pagamento}
-                    </span>
+              {currentVolunteerStats.patrocinadores.map((sp) => {
+                const isPago = sp.status === 'Recebido';
+                return (
+                  <div key={sp.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{isPago ? '✅' : '❌'}</span>
+                        <span className="font-bold text-slate-900 text-sm">{sp.nome}</span>
+                      </div>
+                      <span className="text-xs text-slate-500 flex items-center gap-2 mt-0.5 ml-6">
+                        <Phone className="w-3 h-3 text-slate-400" />
+                        {sp.contato} • {sp.forma_pagamento}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-extrabold text-slate-900 text-sm">
+                        R$ {sp.valor_cota.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
+
+                      {isPago ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span>✅</span>
+                          <span>Pago</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                          <span>❌</span>
+                          <span>Não pago</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-extrabold text-slate-900 text-sm">
-                      R$ {sp.valor_cota.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                      sp.status === 'Recebido'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}>
-                      {sp.status}
-                    </span>
-
-                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold border ${
-                      sp.logo_enviada ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-500 border-slate-200'
-                    }`}>
-                      {sp.logo_enviada ? 'Logo OK' : 'Falta Logo'}
-                    </span>
-
-                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold border ${
-                      sp.video_gravado ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}>
-                      {sp.video_gravado ? 'Vídeo OK' : 'Falta Vídeo'}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -547,20 +544,26 @@ export const VolunteersView: React.FC<VolunteersViewProps> = ({
                   <div className="mt-3 pt-3 border-t border-slate-200/80 space-y-2">
                     <div className="text-xs font-bold text-slate-700">Detalhamento dos Patrocínios:</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {vol.patrocinadores.map(sp => (
-                        <div key={sp.id} className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs flex justify-between items-center">
-                          <div>
-                            <span className="font-bold text-slate-900 block">{sp.nome}</span>
-                            <span className="text-[11px] text-slate-400">{sp.forma_pagamento} • {sp.contato}</span>
+                      {vol.patrocinadores.map(sp => {
+                        const isPago = sp.status === 'Recebido';
+                        return (
+                          <div key={sp.id} className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs flex justify-between items-center">
+                            <div>
+                              <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                                <span>{isPago ? '✅' : '❌'}</span>
+                                <span>{sp.nome}</span>
+                              </div>
+                              <span className="text-[11px] text-slate-400 ml-5">{sp.forma_pagamento} • {sp.contato}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="font-extrabold text-slate-900 block">R$ {sp.valor_cota.toFixed(2)}</span>
+                              <span className={`text-[10px] font-bold ${isPago ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                {isPago ? '✅ Pago' : '❌ Não pago'}
+                              </span>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <span className="font-extrabold text-slate-900 block">R$ {sp.valor_cota.toFixed(2)}</span>
-                            <span className={`text-[10px] font-bold ${sp.status === 'Recebido' ? 'text-emerald-700' : 'text-amber-700'}`}>
-                              {sp.status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
