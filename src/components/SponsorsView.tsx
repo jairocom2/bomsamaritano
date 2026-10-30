@@ -39,7 +39,7 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
   onAddCategoria,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [quickFilter, setQuickFilter] = useState<'all' | 'needVideo' | 'needLogo' | 'needPayment'>('all');
+  const [quickFilter, setQuickFilter] = useState<'all' | 'received' | 'needPayment' | 'needVideo' | 'needLogo'>('all');
   const [selectedVolunteer, setSelectedVolunteer] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState<Patrocinador | null>(null);
@@ -121,6 +121,8 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
   // Quick stats
   const totalCotas = sponsors.reduce((acc, s) => acc + s.valor_cota, 0);
   const totalRecebido = sponsors.filter(s => s.status === 'Recebido').reduce((acc, s) => acc + s.valor_cota, 0);
+  const totalAReceber = totalCotas - totalRecebido;
+  const countAReceber = sponsors.filter(s => s.status === 'A Receber').length;
   const countVideosGravados = sponsors.filter(s => s.video_gravado).length;
   const countLogosEnviadas = sponsors.filter(s => s.logo_enviada).length;
 
@@ -136,9 +138,10 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
       return false;
     }
 
+    if (quickFilter === 'received') return s.status === 'Recebido';
+    if (quickFilter === 'needPayment') return s.status === 'A Receber';
     if (quickFilter === 'needVideo') return !s.video_gravado;
     if (quickFilter === 'needLogo') return !s.logo_enviada;
-    if (quickFilter === 'needPayment') return s.status === 'A Receber';
     return true;
   });
 
@@ -166,9 +169,9 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
       </div>
 
       {/* Indicadores Resumidos (Light Cards) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
         <div className="bg-white border border-slate-200/90 p-3 sm:p-4 rounded-xl shadow-xs">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Cotas Totais</span>
+          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Valor Previsto</span>
           <p className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
             R$ {totalCotas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
@@ -186,6 +189,16 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
         </div>
 
         <div className="bg-white border border-slate-200/90 p-3 sm:p-4 rounded-xl shadow-xs">
+          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Valor A Receber</span>
+          <p className="text-lg sm:text-xl font-bold text-rose-600 mt-0.5">
+            R$ {totalAReceber.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+          <span className="text-[11px] text-rose-600/80 font-medium block mt-0.5">
+            {countAReceber} {countAReceber === 1 ? 'pendente' : 'pendentes'}
+          </span>
+        </div>
+
+        <div className="bg-white border border-slate-200/90 p-3 sm:p-4 rounded-xl shadow-xs">
           <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Vídeos Gravados</span>
           <p className="text-lg sm:text-xl font-bold text-teal-700 mt-0.5">
             {countVideosGravados} / {sponsors.length}
@@ -195,7 +208,7 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
           </span>
         </div>
 
-        <div className="bg-white border border-slate-200/90 p-3 sm:p-4 rounded-xl shadow-xs">
+        <div className="bg-white border border-slate-200/90 p-3 sm:p-4 rounded-xl shadow-xs col-span-2 lg:col-span-1">
           <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Logos Recebidas</span>
           <p className="text-lg sm:text-xl font-bold text-indigo-700 mt-0.5">
             {countLogosEnviadas} / {sponsors.length}
@@ -257,6 +270,28 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
             Todos ({sponsors.length})
           </button>
           <button
+            onClick={() => setQuickFilter('received')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition cursor-pointer flex items-center gap-1 shrink-0 ${
+              quickFilter === 'received'
+                ? 'bg-emerald-600 text-white font-bold'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50'
+            }`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            Recebido ({sponsors.filter(s => s.status === 'Recebido').length})
+          </button>
+          <button
+            onClick={() => setQuickFilter('needPayment')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition cursor-pointer flex items-center gap-1 shrink-0 ${
+              quickFilter === 'needPayment'
+                ? 'bg-rose-600 text-white font-bold'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 text-rose-500" />
+            A Receber ({sponsors.filter(s => s.status === 'A Receber').length})
+          </button>
+          <button
             onClick={() => setQuickFilter('needVideo')}
             className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition cursor-pointer flex items-center gap-1 shrink-0 ${
               quickFilter === 'needVideo'
@@ -277,17 +312,6 @@ export const SponsorsView: React.FC<SponsorsViewProps> = ({
           >
             <ImageIcon className="w-3.5 h-3.5 text-indigo-500" />
             Falta Logo ({sponsors.filter(s => !s.logo_enviada).length})
-          </button>
-          <button
-            onClick={() => setQuickFilter('needPayment')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition cursor-pointer flex items-center gap-1 shrink-0 ${
-              quickFilter === 'needPayment'
-                ? 'bg-rose-600 text-white font-bold'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 text-rose-500" />
-            A Receber ({sponsors.filter(s => s.status === 'A Receber').length})
           </button>
         </div>
       </div>

@@ -14,13 +14,14 @@ import { CategoriesManagementView } from './components/CategoriesManagementView'
 import { AuthView } from './components/AuthView';
 import { HeartHandshake, CheckCircle } from 'lucide-react';
 
-const STORAGE_KEY = 'bom_samaritano_gestao_v4';
+const STORAGE_KEY = 'bom_samaritano_gestao_v5';
+const PREV_STORAGE_KEY = 'bom_samaritano_gestao_v4';
 const USER_STORAGE_KEY = 'bom_samaritano_current_user_v1';
 
 export default function App() {
   const [data, setData] = useState<BackupData>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(PREV_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         // Garantir que users possua a estrutura correta com senhas
@@ -29,9 +30,20 @@ export default function App() {
         }
         if (!parsed.voluntarios || parsed.voluntarios.length === 0) {
           parsed.voluntarios = initialBackupData.voluntarios;
+        } else if (!parsed.voluntarios.some((v: VoluntarioItem) => v.nome.toLowerCase() === 'duceli')) {
+          parsed.voluntarios = [
+            { id: Date.now(), nome: 'Duceli', telefone: '(98) 98000-0000', ativo: true },
+            ...parsed.voluntarios
+          ];
         }
         if (!parsed.categorias || parsed.categorias.length === 0) {
           parsed.categorias = initialBackupData.categorias;
+        }
+        // Garantir que os patrocinadores da Duceli estejam inseridos
+        const hasDuceli = parsed.patrocinadores?.some((p: Patrocinador) => p.voluntario?.toLowerCase() === 'duceli');
+        if (!hasDuceli) {
+          const duceliSponsors = initialBackupData.patrocinadores.filter(p => p.voluntario === 'Duceli');
+          parsed.patrocinadores = [...(parsed.patrocinadores || []), ...duceliSponsors];
         }
         return parsed;
       }
