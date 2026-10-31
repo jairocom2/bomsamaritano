@@ -201,10 +201,10 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <span className="text-xs text-slate-400 block mt-0.5 font-medium">Líquido disponível</span>
         </div>
 
-        {/* Patrocínios */}
+        {/* Patrocínios / Valor Previsto */}
         <div className="bg-white border border-slate-200/90 p-3.5 sm:p-4 rounded-xl shadow-xs">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            <span>Total em Cotas</span>
+            <span>Valor Previsto</span>
             <div className="p-1.5 rounded-lg bg-solar-50 text-solar-600">
               <TrendingUp className="w-4 h-4" />
             </div>

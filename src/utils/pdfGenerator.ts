@@ -97,7 +97,7 @@ export function generateReportPDF({
   doc.setTextColor(100, 116, 139);
 
   // Col 1
-  doc.text('TOTAL COTAS', 18, currentY + 6);
+  doc.text('VALOR PREVISTO', 18, currentY + 6);
   doc.setFontSize(11);
   doc.setTextColor(30, 41, 59);
   doc.text(`R$ ${totalCotas.toFixed(2)}`, 18, currentY + 13);

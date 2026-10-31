@@ -517,7 +517,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ data }) => {
         {(reportType === 'geral' || reportType === 'financeiro' || reportType === 'voluntarios') && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Cotas Totais</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Valor Previsto</span>
               <span className="text-lg font-extrabold text-slate-900 mt-0.5 block">
                 R$ {totalCotas.toFixed(2)}
               </span>
